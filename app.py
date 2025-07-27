@@ -927,8 +927,8 @@ def show_product_manager_panel(df):
                         st.download_button(
                             label="Download Report",
                             data=file.read(),
-                            file_name=f"product_report_{selected_product}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt",
-                            mime="text/plain"
+                            file_name=f"product_report_{selected_product}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf",
+                            mime="application/pdf"
                         )
                 except Exception as download_error:
                     st.error(f"Error preparing download: {download_error}")
@@ -990,8 +990,8 @@ def show_marketing_panel(df):
                         st.download_button(
                             label="Download Campaign Report",
                             data=file.read(),
-                            file_name=f"campaign_report_{selected_campaign.replace(' ', '_')}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt",
-                            mime="text/plain"
+                            file_name=f"campaign_report_{selected_campaign.replace(' ', '_')}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf",
+                            mime="application/pdf"
                         )
                 except Exception as download_error:
                     st.error(f"Error preparing download: {download_error}")
