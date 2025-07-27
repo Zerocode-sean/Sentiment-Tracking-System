@@ -414,21 +414,26 @@ def show_admin_panel():
                 with col1:
                     test_text = st.text_area(
                         "Enter text to analyze:",
+                        value=st.session_state.get('test_text', ''),
                         placeholder="Type your text here to see real-time sentiment analysis...",
-                        height=100
+                        height=100,
+                        key="sentiment_test_text"
                     )
                 
                 with col2:
                     st.write("**Quick Test Examples:**")
                     if st.button("😊 Positive Example"):
-                        test_text = "This product is amazing! I absolutely love it and would definitely recommend it to others."
-                        st.experimental_rerun()
+                        st.session_state['test_text'] = "This product is amazing! I absolutely love it and would definitely recommend it to others."
+                        st.rerun()
                     if st.button("😞 Negative Example"):
-                        test_text = "This is terrible quality. Very disappointed with my purchase and poor customer service."
-                        st.experimental_rerun()
+                        st.session_state['test_text'] = "This is terrible quality. Very disappointed with my purchase and poor customer service."
+                        st.rerun()
                     if st.button("😐 Neutral Example"):
-                        test_text = "The product arrived on time. It's okay, nothing special but does what it's supposed to do."
-                        st.experimental_rerun()
+                        st.session_state['test_text'] = "The product arrived on time. It's okay, nothing special but does what it's supposed to do."
+                        st.rerun()
+                
+                # Get test text from session state or text area
+                test_text = st.session_state.get('test_text', test_text)
                 
                 # Analyze text if provided
                 if test_text and len(test_text.strip()) > 0:
