@@ -180,12 +180,40 @@ def show_admin_panel():
                         # Show sentiment distribution
                         st.write("**Sentiment Distribution:**")
                         sentiment_dist = clean_df[sentiment_column].value_counts()
-                        fig, ax = plt.subplots(figsize=(8, 4))
-                        sentiment_dist.plot(kind='bar', ax=ax, color=['red', 'gray', 'green'])
+                        
+                        # Check for unusual sentiment labels
+                        unique_sentiments = clean_df[sentiment_column].unique()
+                        st.write(f"**Unique Sentiment Labels Found:** {len(unique_sentiments)}")
+                        
+                        if len(unique_sentiments) > 10:
+                            st.warning(f"⚠️ Large number of sentiment labels detected ({len(unique_sentiments)}). This might indicate:")
+                            st.write("• Encoded/hashed sentiment values")
+                            st.write("• Product IDs or other non-sentiment data")
+                            st.write("• Data quality issues")
+                            
+                            # Show first few examples
+                            st.write("**Sample Labels:**", list(unique_sentiments[:10]))
+                            
+                            # Ask user to confirm
+                            if not st.checkbox("⚠️ I understand this data may have unusual labels and want to proceed anyway"):
+                                st.stop()
+                        
+                        # Show sentiment distribution chart
+                        fig, ax = plt.subplots(figsize=(10, 6))
+                        if len(unique_sentiments) <= 10:
+                            # Normal bar chart for reasonable number of categories
+                            sentiment_dist.plot(kind='bar', ax=ax, color=['red', 'gray', 'green'])
+                            plt.xticks(rotation=45)
+                        else:
+                            # Show only top 10 for many categories
+                            sentiment_dist.head(10).plot(kind='bar', ax=ax, color='skyblue')
+                            ax.set_title(f'Top 10 Sentiment Labels (out of {len(unique_sentiments)} total)')
+                            plt.xticks(rotation=45)
+                        
                         ax.set_title('Sentiment Distribution in New Dataset')
                         ax.set_xlabel('Sentiment')
                         ax.set_ylabel('Count')
-                        plt.xticks(rotation=45)
+                        plt.tight_layout()
                         st.pyplot(fig)
                         plt.close()
                         
@@ -217,8 +245,24 @@ def show_admin_panel():
                             st.info("📈 Dataset is relatively small. Accuracy may improve with more training data.")
                         
                         # Show classification report
-                        st.text("Detailed Performance Report:")
-                        st.text(report)
+                        num_classes = len(unique_sentiments)
+                        if num_classes <= 10:
+                            st.text("Detailed Performance Report:")
+                            st.text(report)
+                        else:
+                            st.write("**Performance Summary:**")
+                            st.write(f"• **Classes Trained:** {num_classes}")
+                            st.write(f"• **Overall Accuracy:** {accuracy:.3f}")
+                            st.write("• **Detailed Report:** Too many classes to display (see logs)")
+                            
+                            # Show just the summary lines
+                            report_lines = report.split('\n')
+                            summary_lines = [line for line in report_lines if 'accuracy' in line or 'avg' in line]
+                            if summary_lines:
+                                st.text("Summary Metrics:")
+                                for line in summary_lines:
+                                    if line.strip():
+                                        st.text(line)
                         
                         # Save model and dataset
                         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
@@ -263,11 +307,18 @@ def show_admin_panel():
                         clean_df['platform'] = 'uploaded_dataset'
                         clean_df['date'] = datetime.now()
                         
+                        # Create database dataframe with proper column mapping
+                        db_df = clean_df.copy()
+                        
                         # Rename columns to match database schema
-                        db_df = clean_df.rename(columns={
-                            text_column: 'text',
-                            sentiment_column: 'sentiment'
-                        })
+                        column_mapping = {}
+                        if text_column != 'text':
+                            column_mapping[text_column] = 'text'
+                        if sentiment_column != 'sentiment':
+                            column_mapping[sentiment_column] = 'sentiment'
+                        
+                        if column_mapping:
+                            db_df = db_df.rename(columns=column_mapping)
                         
                         # Add required columns
                         db_df['user_id'] = st.session_state['user']['user_id']
@@ -275,11 +326,19 @@ def show_admin_panel():
                         db_df['confidence'] = None
                         db_df['campaign_id'] = None
                         
-                        # Insert into database
-                        db.insert_feedback_batch(db_df[['user_id', 'product_id', 'platform', 'text', 
-                                                       'sentiment', 'confidence', 'date', 'campaign_id']])
+                        # Ensure all required columns exist
+                        required_columns = ['user_id', 'product_id', 'platform', 'text', 
+                                          'sentiment', 'confidence', 'date', 'campaign_id']
                         
-                        st.success("Data inserted into database successfully!")
+                        # Check if all required columns exist
+                        missing_columns = [col for col in required_columns if col not in db_df.columns]
+                        if missing_columns:
+                            st.error(f"Missing columns for database insert: {missing_columns}")
+                            st.info("Available columns: " + ", ".join(db_df.columns.tolist()))
+                        else:
+                            # Insert into database
+                            db.insert_feedback_batch(db_df[required_columns])
+                            st.success("Data inserted into database successfully!")
                         
                         # Log system health
                         db.log_system_health('model_accuracy', accuracy, 'good' if accuracy > 0.7 else 'warning')
