@@ -3,6 +3,7 @@
 ## Your repository is ready! Here's how to push to GitHub:
 
 ### Step 1: Create GitHub Repository
+
 1. Go to [GitHub.com](https://github.com)
 2. Click the "+" icon → "New repository"
 3. Repository name: `sentiment-tracking-system` (or your preferred name)
@@ -12,6 +13,7 @@
 7. Click "Create repository"
 
 ### Step 2: Connect and Push
+
 Copy and run these commands in your terminal:
 
 ```bash
@@ -23,15 +25,17 @@ git push -u origin main
 ```
 
 ### Step 3: Verify Upload
+
 - Go to your GitHub repository
 - You should see all files including:
   - ✅ Sentiments/src/enhanced_dashboard.py (main app)
-  - ✅ .github/workflows/ci-cd.yml (CI/CD pipeline)  
+  - ✅ .github/workflows/ci-cd.yml (CI/CD pipeline)
   - ✅ README.md (professional documentation)
   - ✅ requirements.txt (pinned dependencies)
   - ✅ Procfile, Dockerfile (deployment configs)
 
 ### Step 4: Check CI/CD Pipeline
+
 - Go to "Actions" tab in your GitHub repository
 - You should see the CI/CD pipeline running automatically
 - Wait for all checks to pass (green checkmarks)
@@ -48,18 +52,21 @@ Once pushed to GitHub, you can immediately deploy to Streamlit Community Cloud:
 6. **Click**: "Deploy!"
 
 ### Your Live App Will Be Available At:
+
 `https://YOUR_USERNAME-sentiment-tracking-system.streamlit.app`
 
 ### Demo Credentials for Client:
+
 - **Admin**: `admin` / `admin123`
-- **Product Manager**: `product_manager` / `pm123`  
+- **Product Manager**: `product_manager` / `pm123`
 - **Marketing Team**: `marketing_team` / `marketing123`
 
 ## 🎉 Success Checklist
 
 After pushing to GitHub:
+
 - [ ] Repository is public and accessible
-- [ ] CI/CD pipeline passes all tests  
+- [ ] CI/CD pipeline passes all tests
 - [ ] All files are present in GitHub
 - [ ] Ready to deploy to Streamlit Cloud
 - [ ] Documentation is professional and complete

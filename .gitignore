@@ -19,10 +19,13 @@ data/*.sqlite
 *.db
 *.sqlite
 
-# Models (will be regenerated)
+# Models (excluding main sentiment models for easy deployment)
 models/
 *.joblib
 *.pkl
+# Allow main model files for easy deployment
+!sentiment_model.joblib
+!tfidf_vectorizer.joblib
 
 # Reports (generated content)
 reports/

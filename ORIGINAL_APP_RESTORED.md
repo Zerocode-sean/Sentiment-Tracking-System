@@ -7,6 +7,7 @@ I've restored your original **full-featured Sentiment Tracking System** with all
 ### **🚀 WHAT'S NOW DEPLOYED:**
 
 #### **Real Features Restored:**
+
 - ✅ **Multi-role Authentication System** (Admin, Product Manager, Marketing)
 - ✅ **Database Management** (SQLite with user activity tracking)
 - ✅ **Admin Panel** (Dataset upload, model training, user management)
@@ -17,17 +18,21 @@ I've restored your original **full-featured Sentiment Tracking System** with all
 - ✅ **Data Visualization** (Charts, trends, breakdowns)
 
 #### **Demo Accounts (Your Original System):**
+
 🔧 **Administrator**
+
 - Username: `admin`
 - Password: `admin123`
 - Features: Full system access, dataset upload, model training
 
 📈 **Product Manager**
-- Username: `product_manager`  
+
+- Username: `product_manager`
 - Password: `pm123`
 - Features: Product analytics, root cause analysis, sentiment alerts
 
 📊 **Marketing Team**
+
 - Username: `marketing`
 - Password: `marketing123`
 - Features: Campaign analytics, brand sentiment tracking
