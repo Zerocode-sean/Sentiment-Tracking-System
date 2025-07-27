@@ -24,6 +24,14 @@ except ImportError:
     st.warning("WordCloud not available - word cloud features will be disabled")
 
 try:
+    import plotly.express as px
+    import plotly.graph_objects as go
+    PLOTLY_AVAILABLE = True
+except ImportError:
+    PLOTLY_AVAILABLE = False
+    st.info("Plotly not available - using matplotlib for charts")
+
+try:
     import joblib
     JOBLIB_AVAILABLE = True
 except ImportError:
@@ -368,7 +376,9 @@ def show_product_manager_panel(df):
             st.warning("No valid sentiment data found in the dataset.")
             return
         
-        negative_count = len(product_df[product_df[sentiment_col].str.lower().str.contains('negative|bad|poor|1|2', na=False)])
+        # Convert sentiment column to string for text operations
+        sentiment_str = product_df[sentiment_col].astype(str).str.lower()
+        negative_count = len(product_df[sentiment_str.str.contains('negative|bad|poor|1|2', na=False)])
         total_count = len(product_df.dropna(subset=[sentiment_col]))
         negative_ratio = negative_count / total_count if total_count > 0 else 0
         
@@ -598,9 +608,15 @@ def show_product_manager_panel(df):
         top_keywords = issue_keywords[top_issue]
         
         # Find feedback containing top issue keywords
-        issue_feedback = negative_df[
-            negative_df[text_col].str.lower().str.contains('|'.join(top_keywords), na=False)
-        ].head(3)
+        try:
+            # Ensure text column is string type for .str operations
+            text_series = negative_df[text_col].astype(str).str.lower()
+            issue_feedback = negative_df[
+                text_series.str.contains('|'.join(top_keywords), na=False)
+            ].head(3)
+        except Exception as e:
+            st.warning(f"Could not filter feedback by keywords: {e}")
+            issue_feedback = negative_df.head(3)  # Fallback to first 3
         
         st.write(f"**Top Issue: {top_issue}**")
         for idx, row in issue_feedback.iterrows():
@@ -897,24 +913,43 @@ def main():
                 st.subheader('🎯 Sentiment Distribution')
                 sentiment_counts = df[sentiment_col].value_counts()
                 
-                fig, ax = plt.subplots(figsize=(8, 6))
-                colors = ['green' if 'pos' in str(idx).lower() else 'red' if 'neg' in str(idx).lower() else 'gray' 
-                         for idx in sentiment_counts.index]
-                bars = ax.bar(sentiment_counts.index, sentiment_counts.values, color=colors, alpha=0.7)
-                ax.set_title('Sentiment Distribution', fontsize=14, fontweight='bold')
-                ax.set_xlabel('Sentiment')
-                ax.set_ylabel('Count')
-                
-                # Add value labels on bars
-                for bar in bars:
-                    height = bar.get_height()
-                    ax.text(bar.get_x() + bar.get_width()/2., height + height*0.01,
-                           f'{int(height)}', ha='center', va='bottom')
-                
-                plt.xticks(rotation=45)
-                plt.tight_layout()
-                st.pyplot(fig)
-                plt.close()
+                if PLOTLY_AVAILABLE:
+                    # Use Plotly for interactive charts
+                    colors = ['green' if 'pos' in str(idx).lower() else 'red' if 'neg' in str(idx).lower() else 'gray' 
+                             for idx in sentiment_counts.index]
+                    
+                    fig = go.Figure(data=[
+                        go.Bar(x=sentiment_counts.index, y=sentiment_counts.values, 
+                               marker_color=colors, opacity=0.7,
+                               text=sentiment_counts.values, textposition='auto')
+                    ])
+                    fig.update_layout(
+                        title='Sentiment Distribution',
+                        xaxis_title='Sentiment',
+                        yaxis_title='Count',
+                        height=400
+                    )
+                    st.plotly_chart(fig, use_container_width=True)
+                else:
+                    # Fallback to matplotlib
+                    fig, ax = plt.subplots(figsize=(8, 6))
+                    colors = ['green' if 'pos' in str(idx).lower() else 'red' if 'neg' in str(idx).lower() else 'gray' 
+                             for idx in sentiment_counts.index]
+                    bars = ax.bar(sentiment_counts.index, sentiment_counts.values, color=colors, alpha=0.7)
+                    ax.set_title('Sentiment Distribution', fontsize=14, fontweight='bold')
+                    ax.set_xlabel('Sentiment')
+                    ax.set_ylabel('Count')
+                    
+                    # Add value labels on bars
+                    for bar in bars:
+                        height = bar.get_height()
+                        ax.text(bar.get_x() + bar.get_width()/2., height + height*0.01,
+                               f'{int(height)}', ha='center', va='bottom')
+                    
+                    plt.xticks(rotation=45)
+                    plt.tight_layout()
+                    st.pyplot(fig)
+                    plt.close()
         
         # Platform Distribution (if platform column exists)
         with col2:
@@ -924,12 +959,19 @@ def main():
                 st.subheader('📱 Platform Breakdown')
                 platform_counts = df[platform_col].value_counts()
                 
-                fig, ax = plt.subplots(figsize=(8, 6))
-                platform_counts.plot(kind='pie', ax=ax, autopct='%1.1f%%', startangle=90)
-                ax.set_title('Feedback by Platform')
-                ax.set_ylabel('')
-                st.pyplot(fig)
-                plt.close()
+                if PLOTLY_AVAILABLE:
+                    # Use Plotly for interactive pie chart
+                    fig = px.pie(values=platform_counts.values, names=platform_counts.index,
+                                title='Feedback by Platform', height=400)
+                    st.plotly_chart(fig, use_container_width=True)
+                else:
+                    # Fallback to matplotlib
+                    fig, ax = plt.subplots(figsize=(8, 6))
+                    platform_counts.plot(kind='pie', ax=ax, autopct='%1.1f%%', startangle=90)
+                    ax.set_title('Feedback by Platform')
+                    ax.set_ylabel('')
+                    st.pyplot(fig)
+                    plt.close()
             else:
                 # Show top words if no platform column
                 if text_col:
@@ -968,20 +1010,45 @@ def main():
                     # Group by date and sentiment
                     daily_sentiment = df_time.groupby([df_time[date_col].dt.date, sentiment_col]).size().unstack(fill_value=0)
                     
-                    fig, ax = plt.subplots(figsize=(12, 6))
-                    for sentiment in daily_sentiment.columns:
-                        color = 'green' if 'pos' in str(sentiment).lower() else 'red' if 'neg' in str(sentiment).lower() else 'gray'
-                        ax.plot(daily_sentiment.index, daily_sentiment[sentiment], 
-                               label=sentiment, marker='o', color=color)
-                    
-                    ax.set_title('Sentiment Trends Over Time')
-                    ax.set_xlabel('Date')
-                    ax.set_ylabel('Count')
-                    ax.legend()
-                    ax.tick_params(axis='x', rotation=45)
-                    plt.tight_layout()
-                    st.pyplot(fig)
-                    plt.close()
+                    if PLOTLY_AVAILABLE:
+                        # Use Plotly for interactive time series
+                        fig = go.Figure()
+                        
+                        for sentiment in daily_sentiment.columns:
+                            color = 'green' if 'pos' in str(sentiment).lower() else 'red' if 'neg' in str(sentiment).lower() else 'gray'
+                            fig.add_trace(go.Scatter(
+                                x=daily_sentiment.index,
+                                y=daily_sentiment[sentiment],
+                                mode='lines+markers',
+                                name=sentiment,
+                                line=dict(color=color),
+                                marker=dict(size=6)
+                            ))
+                        
+                        fig.update_layout(
+                            title='Sentiment Trends Over Time',
+                            xaxis_title='Date',
+                            yaxis_title='Count',
+                            height=500,
+                            hovermode='x unified'
+                        )
+                        st.plotly_chart(fig, use_container_width=True)
+                    else:
+                        # Fallback to matplotlib
+                        fig, ax = plt.subplots(figsize=(12, 6))
+                        for sentiment in daily_sentiment.columns:
+                            color = 'green' if 'pos' in str(sentiment).lower() else 'red' if 'neg' in str(sentiment).lower() else 'gray'
+                            ax.plot(daily_sentiment.index, daily_sentiment[sentiment], 
+                                   label=sentiment, marker='o', color=color)
+                        
+                        ax.set_title('Sentiment Trends Over Time')
+                        ax.set_xlabel('Date')
+                        ax.set_ylabel('Count')
+                        ax.legend()
+                        ax.tick_params(axis='x', rotation=45)
+                        plt.tight_layout()
+                        st.pyplot(fig)
+                        plt.close()
             except Exception as e:
                 st.warning(f"Could not create time series: {e}")
         
