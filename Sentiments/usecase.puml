@@ -1,0 +1,18 @@
+@startuml
+actor Admin
+actor ProductManager
+actor MarketingTeam
+
+rectangle "User Sentiment Tracking System" {
+  Admin -- (Manage Users)
+  Admin -- (Manage Data Sources)
+  Admin -- (Manage Models)
+  ProductManager -- (View Product Sentiment)
+  ProductManager -- (Download Reports)
+  MarketingTeam -- (View Brand Sentiment)
+  MarketingTeam -- (Analyze Campaign Feedback)
+  (View Product Sentiment) -- (Visualize Data)
+  (View Brand Sentiment) -- (Visualize Data)
+  (Analyze Campaign Feedback) -- (Download Reports)
+}
+@enduml

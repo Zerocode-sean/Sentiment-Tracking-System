@@ -1,0 +1,10 @@
+@startuml
+start
+:User uploads data or connects API;
+:Ingest feedback into system;
+:Preprocess and clean text;
+:Classify sentiment using SentimentModel;
+:Store results in database;
+:Visualize and report results;
+stop
+@enduml

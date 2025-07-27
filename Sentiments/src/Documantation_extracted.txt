@@ -1,0 +1,685 @@
+ 
+   
+ 
+USER SENTIMENT TRACKING SYSTEM FOR A BRAND OR PRODUCT  
+ 
+ 
+ 
+SYSTEM DOCUMENTATION  
+ 
+ 
+ 
+SUBMITTED BY,  
+AGNES AHENDA  
+DIT-01-8232/2023  
+ 
+ 
+ 
+  
+ 
+ 
+A  SYSTEM DOCUMANTATION  SUBMITTED IN  PARTIAL  FULFILMENT FOR  THE 
+AWARD  OF DIPLOMA IN INFORMATION TECHNOLOGY BY ZETECH  UNIVERSITY.  
+ 
+ 
+ 
+ 
+ 
+AUGUST , 2025  
+ 
+ DECLARATION  
+I declare that the contents of this document is my original work from my own 
+research and study, The content is generated from absolute relevant external 
+genuine information websites with no plagiarism.                                                                                                                                                
+Student Name: _____________   Signature: _____________  Date: _____________  
+ 
+ 
+ 
+ 
+  
+ 
+ Agnes Ahenda  
+ 
+AUGUST,2025  i 
+ DEDICATION  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ ii 
+ ABSTRACT  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ iii 
+ LIST OF TABLES  
+ 
+  
+ iv 
+ LIST OF FIGURES  
+ 
+ v 
+ DEFINATION OF KEY TERMS  
+ 
+  
+ 1 
+ ABBREVIATIONS AND ACRONYMS  
+ 
+ 
+ 1 
+ CHAPTER ONE: RESEARCH OVERVIEW  
+ 
+1.1 Statement of Problem  
+Many brands struggles to effectively monitor and analyze user sentiment across 
+various platforms such as social media, review sites and customer feedback 
+channels. The absence of a centralized, real -time sentiment tracking system often 
+leads to delayed res ponses to negative feedback, missed opportunities to engage 
+with customers, and inability to identify emerging trends or issues. For a specific 
+brand of product, the lack of a robust sentiment tracking system results to 
+challenges like, inability to gauge customer sentiment accurately, delay response to 
+negative feedback, missed opportunities for positive engagement, difficulty  in 
+identifying trends and also manual analysis is time consuming and inefficient.  
+ 
+1.2 Study Justification  
+A User Sentiment Tracking System is vital for a brand to monitor and analyze 
+customer feedback in real time. This study is justified as it enables the brand to 
+improve customer satisfaction, proactively manage its reputation and make data 
+driven decisions.  By automating sentiment analysis, the brand can efficiently scale 
+its efforts, stay ahead of competitors, and align with industry trends. Implementing 
+such a system ensures the brand remains responsive to customer needs, enhances 
+its products, and maintai ns a competitive edge in the market. The study will aim  
+me with sufficient knowledge which will help me get prepare to develop the 
+platform in the coming semester as my end of diploma project  
+ 
+1.3 Research Objectives  
+ 
+1.3.1 General Objective  
+  (i)To develop a user sentiment tracking system for brand or product.  
+1.3.2 Specific Objectives  
+(i) To develop a system capable of tracking and analyzing user sentiment in real 
+time across multiple platforms.  
+ (ii) To implement algorithms to classify user feedback into positive, negative and 
+neutral feedback to provide actionable insights for product improvement and 
+marketing strategies.  
+  (ii) To design the system to handle large volume of data and adapt new platforms, 
+languages and evolving customer communication trends.  
+ 2 
+  
+ 
+1.4 FUCTIONAL REQUIREMENTS  
+ 
+User  User Activities  
+Customer  - Sign up  
+- Login  
+- Search Items  
+- Add to  
+- Shop  
+- Make payments  
+- Make Comment   
+- Download Receipt   
+ 
+Manager  - Login  
+- Track Orders  
+- Monitor Sentiment 
+trends  
+- Gather User 
+feedback  
+Executive Leadership  - Login  
+- Oversees all 
+activities  
+System  - Validating Sign up 
+information  
+- Calculate the 
+payments to be 
+made by the 
+customer  
+- Generate receipts  
+- Track sales  
+- Generate all 
+feedbacks  
+ 
+ 
+ 
+ 
+  3 
+ 1.5 Breakdown of Tools and Resources to Be Used  
+     Tools             Purpose     Cost (ksh)       Alternatives  
+Laptop  For developing 
+host and website              0            N/A 
+Visual 
+Studio 
+Code  For developing 
+website              0            N/A 
+Database 
+platform  To develop website 
+for storing data 
+used by the system              0            N/A 
+Bar Code 
+reader  For quick reading 
+of product bar code      4000-5000  Slow but 
+works  
+Web 
+hosting 
+platform  To host the website 
+and have it leave 
+on the internet  500-1000USD/ 
+Month-
+BlueHost  Free web 
+hosting 
+subscription  
+Product 
+Store  Where the 
+products will be 
+store for quick sales      8000-10000  Customers 
+pick their 
+products to 
+the store or 
+delivered to  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 4 
+  
+ 
+1.6 Project Schedule Breakdown  
+ PROJECT MILESTONES  
+WEEKS  Project 
+Planning & 
+Analysis  
+ 
+(System 
+Documentation: 
+Cover  page & 
+Chapter One)  Project Design 
+& Modeling  
+ 
+(System 
+Documentation 
+Chapter Two)  Project 
+Development & 
+Testing  
+ 
+(System 
+Documentation 
+Chapter Three)  Project 
+Deployment  
+ 
+(System 
+Documentation 
+Chapter Three)  Final Touches 
+of System 
+Documentation  
+ 
+(Preliminary 
+Pages, Chapter 
+Four & 
+References)  
+18-23 
+May       
+5-10 
+June       
+19-23 
+June       
+26-30 
+June       
+2-6  
+July       
+9-13 
+July       
+16-20 
+July       
+23-27 
+July       
+30-4 
+July       
+7-11 
+July       
+14-18 
+July       
+21-25 
+July       
+11 
+ Aug       
+Table 1.6 Project Schedule Gantt Chart  
+ 
+ 
+ 
+ 
+ 5 
+ CHAPTER TWO: DESIGN AND MODELLING  
+2.1 Introduction to Modelling  
+User sentiment tracking system use AI and NLP to analyze customer opinions from 
+social media, reviews, and surveys. The sources reviewed are not older than 5 years 
+in the past as of the time this paper was written (2025) and this ensures that only 
+current and reliable data solutions are investigated. APA7 has been used to conduct 
+in text citation for this paper and referencing at the end of this paper. The research 
+findings shows that modern machine learning models improve accuracy, helping 
+brands enhance r eputation, customer satisfaction, and decision making. However, 
+challenges like sarcasm detection and fake reviews persist. Advancements in big 
+data and AI continue to refine sentiment analysis, making it crucial for brand 
+success. The section has the foll owing sub sections, empirical review deals with 
+solutions, and conclusion which summarizes the contents of conceptual and 
+empirical review.  
+2.2 User Interface Model  
+ A user sentiment tracking system classifies sentiments as positive, negative or 
+neutral helping brands improve reputation, customer engagement and product 
+strategy. Key challenges include sarcasm detection, fake reviews and contextual 
+misinterpretation. A dvancements in AI and big data analytics continue to refine 
+sentiment tracking, making it valuable tool for brand.  
+2.2.1 Sign up Form  
+This form will allow a new customer to fill in their details so that they can start 
+using the system and it will look as follows:  
+First name  
+ 
+ 
+Second name  
+ 
+ 
+Email  
+ 
+ 
+Password  
+ 
+ 
+Confirm Password  6 
+  
+ 
+      Cancel                                                                   
+ 
+ 
+Already have an account. Login  
+ 
+2.2.2 Login Page  
+ In this page, the customer will enter his/her login credentials to access the system, 
+and shall look as pictured below:  
+ 
+Email  
+ 
+ 
+Password  
+ 
+ 
+           
+        Login                                                                     
+  
+                                      Forgot P assword ? 
+ 
+2.2.3  
+Admin Login  
+Email or Username  
+ 
+ 
+Password  
+ 
+ 
+ 
+ 
+ 
+         Register                                                                       
+       Login                                                                     
+       Cancel                                                                  7 
+  
+                                       Forgot Password?  
+ 
+ 
+2.2.3 Main Dashboard  
+ This is the home page where the customer will get to after a successful log in and 
+will contain the primary controls for the system like  Search items , prices, Shop and  
+add to cut . The dashboard will look as follows:  
+  
+  
+ 
+                                  
+ 
+My Account  
+ 
+ 
+ Search  
+ 
+ 
+ Items  
+ 
+ 
+ New Items  
+   
+ 
+Delivery  
+ 
+ 
+ Notifications  
+        Logo                                                                     
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 8 
+ 2.2.4 Shopping  Fill up Form  
+ 
+ 
+ 
+  
+  
+ 
+                                  
+ 
+Price  
+ 
+Shop  
+ 
+ Add to cut  
+ 
+ Make Payments  
+ 
+ Download Receipt  
+ 
+ Feedback  
+        Logo                                                                     
+ 
+ 
+  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 9 
+ 2.2.5 Delivery Fill up Form  
+ 
+Country  
+ 
+City 
+ 
+Nearest Station  
+ 
+ID or Passport Number  
+ 
+Phone Number  
+ 
+ 
+2.2.6 Return Policy  
+2.2.7 Notification Page  
+2.2.8 Feedback Page  
+ 
+ 
+ 
+ 
+2.3 Logic Model  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 10 
+ 2.3.1 Use Case Diagram  
+ 
+ 
+  
+ 
+ 
+  
+                                                     Customer   
+ 
+  
+  Sign up                                                                                        
+                                                                                                        Make Feedback  
+ 
+             Login     Shop items     Make payment         Download receipt            
+ 
+ 
+ 
+  
+ 
+  
+ 
+ 
+    
+                                                  Manager   
+ 
+  
+  
+  Sign up                                                                                      Gather Feedbacks  
+ 
+                        Login  Track orders           Monitor S entiment 11 
+  
+  
+ 
+  
+ 
+ 
+                                      
+                                         Executive Leadership  
+ 
+  
+  
+                                                                                     
+ 
+              Sign up                           Login               Oversees All Activities  
+ 
+ 
+ 
+   
+ 
+  
+  
+ 
+    
+                                                     System   
+ 
+  
+Validating Sign up information   
+                                                                                                   Generate all feedbacks       
+Calculate the payments  
+                                           Generate receipts         Track sales  12 
+  
+ 
+  
+ 
+ 
+                                      
+                                                  Customer  
+   
+  
+ 
+ 
+                                                    Feedback  
+ 
+                                                                                                                                                                                     
+ 
+ 
+   
+                Add Comment           Cancel         Delete Comment                     
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 13 
+  
+ 
+  
+ 
+ 
+                                      
+                                                  Customer  
+  
+  
+ 
+ 
+                                                       Shop  
+ 
+                                                                                                                                                                                     
+ 
+ 
+   
+                    Add to cart             Cancel           Remove from cart  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 14 
+  
+ 
+  
+ 
+ 
+                                      
+                                                  Customer  
+   
+  
+ 
+ 
+                                                   Payment  
+ 
+                                                                                                                                                                                     
+ 
+ 
+ 
+                 Enter Amount           Cancel              Enter PIN  
+ 
+ 
+2.3.2 Package Diagram  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ Login  
+User registration  Password recovery  15 
+  
+ 
+3.1 Validate Sign Up  
+ 
+ 
+ 
+ 
+  
+ 
+ 
+ 
+ 
+  
+ 
+ 
+ 
+ 
+ 
+ 
+  
+ 
+ 
+  
+ 
+ 
+ 
+ 
+ 
+ 
+ SSSSSSS
+SSSSSSS
+SDDDD
+FSSASS
+SF 
+User Info Input  Start  
+Details entered are 
+correct and all filled  Error Message if the 
+details entered are 
+incorrect  Success Message if the 
+details entered are 
+correct  
+Open login page  
+     Stop  16 
+  
+ 
+ 
+ 
+CHAPTER THREE:  SYSTEM IMPLEMENTATION  
+(DEVELOPMENT, TESTING AND DEPLOYMENT)  
+3.1 Introduction  

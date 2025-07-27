@@ -1,0 +1,40 @@
+@startuml
+entity User {
+  * user_id : int <<PK>>
+  --
+  name : string
+  email : string
+  role : string
+  password_hash : string
+}
+
+entity Feedback {
+  * feedback_id : int <<PK>>
+  --
+  user_id : int <<FK>>
+  platform : string
+  text : string
+  date : datetime
+  sentiment : string
+  product_id : int <<FK>>
+}
+
+entity Product {
+  * product_id : int <<PK>>
+  --
+  name : string
+  category : string
+}
+
+entity SentimentModel {
+  * model_id : int <<PK>>
+  --
+  version : string
+  created_at : datetime
+  description : string
+}
+
+User ||--o{ Feedback
+Product ||--o{ Feedback
+SentimentModel ||--o{ Feedback : classifies >
+@enduml
