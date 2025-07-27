@@ -215,7 +215,7 @@ def show_admin_panel():
                         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
                         
                         # Save cleaned dataset
-                        data_folder = os.path.join(os.path.dirname(__file__), '..', 'data')
+                        data_folder = os.path.join(os.path.dirname(__file__), 'data')
                         os.makedirs(data_folder, exist_ok=True)
                         
                         # Use custom name or default with timestamp
@@ -228,7 +228,7 @@ def show_admin_panel():
                         clean_df.to_csv(dataset_path, index=False)
                         
                         # Save model
-                        models_folder = os.path.join(os.path.dirname(__file__), '..', 'models')
+                        models_folder = os.path.join(os.path.dirname(__file__), 'models')
                         os.makedirs(models_folder, exist_ok=True)
                         model_path = os.path.join(models_folder, f"model_{timestamp}.joblib")
                         vectorizer_path = os.path.join(models_folder, f"vectorizer_{timestamp}.joblib")
@@ -237,8 +237,8 @@ def show_admin_panel():
                         joblib.dump(vectorizer, vectorizer_path)
                         
                         # Update main model files
-                        main_model_path = os.path.join(os.path.dirname(__file__), '..', "sentiment_model.joblib")
-                        main_vectorizer_path = os.path.join(os.path.dirname(__file__), '..', "tfidf_vectorizer.joblib")
+                        main_model_path = os.path.join(os.path.dirname(__file__), "sentiment_model.joblib")
+                        main_vectorizer_path = os.path.join(os.path.dirname(__file__), "tfidf_vectorizer.joblib")
                         joblib.dump(model, main_model_path)
                         joblib.dump(vectorizer, main_vectorizer_path)
                         
@@ -286,7 +286,7 @@ def show_admin_panel():
     
     # Existing datasets management
     st.subheader("📁 Existing Datasets")
-    data_folder = os.path.join(os.path.dirname(__file__), '..', 'data')
+    data_folder = os.path.join(os.path.dirname(__file__), 'data')
     if os.path.exists(data_folder):
         csv_files = [f for f in os.listdir(data_folder) if f.endswith('.csv')]
         if csv_files:
@@ -804,12 +804,19 @@ def main():
     if st.sidebar.button("📋 General Dashboard"):
         st.session_state['current_page'] = 'dashboard'
     
-    # Default to dashboard
+    # Default to appropriate page based on user role
     if 'current_page' not in st.session_state:
-        st.session_state['current_page'] = 'dashboard'
+        if auth.require_permission('manage_users'):
+            st.session_state['current_page'] = 'admin'
+        elif auth.require_permission('view_product_sentiment'):
+            st.session_state['current_page'] = 'product'
+        elif auth.require_permission('view_brand_sentiment'):
+            st.session_state['current_page'] = 'marketing'
+        else:
+            st.session_state['current_page'] = 'dashboard'
     
-    # Load data for dashboard
-    data_folder = os.path.join(os.path.dirname(__file__), '..', 'data')
+    # Load data for dashboard (only for non-admin pages)
+    data_folder = os.path.join(os.path.dirname(__file__), 'data')
     
     # Refresh file list
     if st.sidebar.button("🔄 Refresh Dataset List"):
@@ -819,15 +826,14 @@ def main():
     if os.path.exists(data_folder):
         available_files = [f for f in os.listdir(data_folder) if f.lower().endswith('.csv')]
     
-    if not available_files:
-        st.error('No CSV files found in the data folder.')
-        st.info("Upload a dataset through the Admin Panel to get started.")
-        return
-    
     # Show appropriate panel based on current page
     if st.session_state['current_page'] == 'admin':
         show_admin_panel()
     elif st.session_state['current_page'] == 'product':
+        if not available_files:
+            st.error('No CSV files found in the data folder.')
+            st.info("Upload a dataset through the Admin Panel to get started.")
+            return
         # Load data for product panel
         selected_file = st.sidebar.selectbox('Select dataset', available_files)
         data_path = os.path.join(data_folder, selected_file)
