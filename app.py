@@ -917,17 +917,25 @@ def show_product_manager_panel(df):
         os.makedirs("reports", exist_ok=True)
         
         try:
-            report_gen.generate_product_report(product_df, selected_product, report_path)
-            st.success(f"Report generated: {report_path}")
-            
-            # Download button
-            with open(report_path, "rb") as file:
-                st.download_button(
-                    label="Download PDF Report",
-                    data=file.read(),
-                    file_name=f"product_report_{selected_product}.pdf",
-                    mime="application/pdf"
-                )
+            generated_path = report_gen.generate_product_report(product_df, selected_product, report_path)
+            if generated_path and os.path.exists(generated_path):
+                st.success(f"Report generated: {generated_path}")
+                
+                # Download button
+                try:
+                    with open(generated_path, "rb") as file:
+                        st.download_button(
+                            label="Download Report",
+                            data=file.read(),
+                            file_name=f"product_report_{selected_product}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt",
+                            mime="text/plain"
+                        )
+                except Exception as download_error:
+                    st.error(f"Error preparing download: {download_error}")
+            else:
+                st.error("Failed to generate report - file not created")
+        except Exception as e:
+            st.error(f"Error generating report: {e}")
         except Exception as e:
             st.error(f"Error generating report: {e}")
 
@@ -962,16 +970,22 @@ def show_marketing_panel(df):
         os.makedirs("reports", exist_ok=True)
         
         try:
-            report_gen.generate_marketing_report(df, selected_campaign, report_path)
-            st.success(f"Campaign report generated: {report_path}")
-            
-            with open(report_path, "rb") as file:
-                st.download_button(
-                    label="Download Campaign Report",
-                    data=file.read(),
-                    file_name=f"campaign_report_{selected_campaign}.pdf",
-                    mime="application/pdf"
-                )
+            generated_path = report_gen.generate_marketing_report(df, selected_campaign, report_path)
+            if generated_path and os.path.exists(generated_path):
+                st.success(f"Campaign report generated: {generated_path}")
+                
+                try:
+                    with open(generated_path, "rb") as file:
+                        st.download_button(
+                            label="Download Campaign Report",
+                            data=file.read(),
+                            file_name=f"campaign_report_{selected_campaign.replace(' ', '_')}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt",
+                            mime="text/plain"
+                        )
+                except Exception as download_error:
+                    st.error(f"Error preparing download: {download_error}")
+            else:
+                st.error("Failed to generate campaign report - file not created")
         except Exception as e:
             st.error(f"Error generating report: {e}")
 

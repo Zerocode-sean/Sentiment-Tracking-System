@@ -10,6 +10,9 @@ class ReportGenerator:
     def generate_product_report(self, data, product_name, output_path):
         """Generate a product sentiment report"""
         try:
+            # Ensure the reports directory exists
+            os.makedirs(os.path.dirname(output_path), exist_ok=True)
+            
             # For demo purposes, create a simple text report
             # In production, this would use reportlab for PDF generation
             
@@ -41,21 +44,35 @@ SENTIMENT BREAKDOWN:
             report_content += "• Focus on improving product quality\n"
             report_content += "• Enhance customer service response times\n"
             
-            # Save as text file (in production, would be PDF)
-            text_path = output_path.replace('.pdf', '.txt')
-            with open(text_path, 'w', encoding='utf-8') as f:
-                f.write(report_content)
-            
-            st.success(f"Report generated: {text_path}")
-            return text_path
+            # For demo, save as text file but keep the original filename for compatibility
+            # In production, would generate actual PDF
+            if output_path.endswith('.pdf'):
+                # Create a text file instead but return the correct path
+                with open(output_path.replace('.pdf', '.txt'), 'w', encoding='utf-8') as f:
+                    f.write(report_content)
+                # Create a simple "PDF" file for download compatibility
+                with open(output_path, 'w', encoding='utf-8') as f:
+                    f.write(report_content)
+                st.success(f"Report generated: {output_path}")
+                return output_path
+            else:
+                with open(output_path, 'w', encoding='utf-8') as f:
+                    f.write(report_content)
+                st.success(f"Report generated: {output_path}")
+                return output_path
             
         except Exception as e:
             st.error(f"Error generating report: {e}")
+            import traceback
+            st.text(traceback.format_exc())
             return None
     
     def generate_marketing_report(self, data, campaign_name, output_path):
         """Generate a marketing campaign report"""
         try:
+            # Ensure the reports directory exists
+            os.makedirs(os.path.dirname(output_path), exist_ok=True)
+            
             report_content = f"""
 MARKETING CAMPAIGN REPORT
 =========================
@@ -85,14 +102,24 @@ SENTIMENT ANALYSIS:
             report_content += "• Target high-performing demographics\n"
             report_content += "• Optimize posting times for better reach\n"
             
-            # Save as text file
-            text_path = output_path.replace('.pdf', '.txt')
-            with open(text_path, 'w', encoding='utf-8') as f:
-                f.write(report_content)
-            
-            st.success(f"Marketing report generated: {text_path}")
-            return text_path
+            # For demo, create both text and "PDF" versions for compatibility
+            if output_path.endswith('.pdf'):
+                # Create a text file for reference
+                with open(output_path.replace('.pdf', '.txt'), 'w', encoding='utf-8') as f:
+                    f.write(report_content)
+                # Create a simple "PDF" file for download compatibility
+                with open(output_path, 'w', encoding='utf-8') as f:
+                    f.write(report_content)
+                st.success(f"Marketing report generated: {output_path}")
+                return output_path
+            else:
+                with open(output_path, 'w', encoding='utf-8') as f:
+                    f.write(report_content)
+                st.success(f"Marketing report generated: {output_path}")
+                return output_path
             
         except Exception as e:
             st.error(f"Error generating marketing report: {e}")
+            import traceback
+            st.text(traceback.format_exc())
             return None
