@@ -943,7 +943,18 @@ def show_marketing_panel(df):
     """Show marketing team specific features"""
     if not auth.require_permission('view_brand_sentiment'):
         st.error("Access denied: Marketing Team privileges required")
-        st.write(f"Your permissions: {st.session_state.get('permissions', [])}")
+        st.warning(f"**Current User Role:** {st.session_state.get('user', {}).get('role', 'Unknown')}")
+        st.info(f"**Your Permissions:** {st.session_state.get('permissions', [])}")
+        st.info("**Required Permission:** view_brand_sentiment")
+        
+        # Provide helpful navigation
+        if auth.require_permission('view_product_sentiment'):
+            st.info("💡 **Suggestion:** Click **'📈 Product Analytics'** in the sidebar to access your dashboard.")
+        elif auth.require_permission('manage_users'):
+            st.info("💡 **Suggestion:** Click **'🔧 Admin Panel'** in the sidebar to access your dashboard.")
+        else:
+            st.info("💡 **Suggestion:** Click **'📋 General Dashboard'** in the sidebar.")
+        
         return
     
     st.header("📊 Marketing Dashboard")
@@ -1053,8 +1064,20 @@ def main():
     with col2:
         # Debug info
         with st.expander("Debug Info"):
-            st.write(f"Role: {user['role']}")
-            st.write(f"Permissions: {st.session_state.get('permissions', [])}")
+            st.write(f"**Role:** {user['role']}")
+            st.write(f"**Permissions:** {st.session_state.get('permissions', [])}")
+            st.write(f"**Current Page:** {st.session_state.get('current_page', 'Not Set')}")
+            if st.button("🔄 Reset Session", key="reset_session"):
+                # Reset to appropriate default page
+                if auth.require_permission('manage_users'):
+                    st.session_state['current_page'] = 'admin'
+                elif auth.require_permission('view_product_sentiment'):
+                    st.session_state['current_page'] = 'product'
+                elif auth.require_permission('view_brand_sentiment'):
+                    st.session_state['current_page'] = 'marketing'
+                else:
+                    st.session_state['current_page'] = 'dashboard'
+                st.rerun()
     with col3:
         if st.button("Logout"):
             auth.logout()
@@ -1078,8 +1101,8 @@ def main():
     if st.sidebar.button("📋 General Dashboard"):
         st.session_state['current_page'] = 'dashboard'
     
-    # Default to appropriate page based on user role
-    if 'current_page' not in st.session_state:
+    # Default to appropriate page based on user role (with session state reset)
+    if 'current_page' not in st.session_state or st.session_state.get('current_page') is None:
         if auth.require_permission('manage_users'):
             st.session_state['current_page'] = 'admin'
         elif auth.require_permission('view_product_sentiment'):
@@ -1088,6 +1111,17 @@ def main():
             st.session_state['current_page'] = 'marketing'
         else:
             st.session_state['current_page'] = 'dashboard'
+    
+    # Validate current page against user permissions
+    current_page = st.session_state.get('current_page', 'dashboard')
+    
+    # If user doesn't have permission for current page, redirect to appropriate page
+    if current_page == 'admin' and not auth.require_permission('manage_users'):
+        st.session_state['current_page'] = 'product' if auth.require_permission('view_product_sentiment') else 'dashboard'
+    elif current_page == 'product' and not auth.require_permission('view_product_sentiment'):
+        st.session_state['current_page'] = 'marketing' if auth.require_permission('view_brand_sentiment') else 'dashboard'
+    elif current_page == 'marketing' and not auth.require_permission('view_brand_sentiment'):
+        st.session_state['current_page'] = 'product' if auth.require_permission('view_product_sentiment') else 'dashboard'
     
     # Load data for dashboard (only for non-admin pages)
     data_folder = os.path.join(os.path.dirname(__file__), 'data')
