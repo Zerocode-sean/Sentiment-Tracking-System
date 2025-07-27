@@ -1,7 +1,6 @@
+# Python 3.13 compatible dependencies - NO pinned versions
 streamlit
 pandas
 numpy
 matplotlib
 plotly
-scikit-learn
-joblib
