@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 import sys
 import sqlite3
 import re
+from collections import Counter
 
 # Add current directory to path for imports
 sys.path.append(os.path.dirname(__file__))
@@ -859,17 +860,197 @@ def main():
         # Log activity
         db.log_activity(user['user_id'], 'view_dashboard', f"Viewed dashboard with dataset: {selected_file}")
         
-        # Rest of existing dashboard code would go here...
-        st.header("📊 General Sentiment Dashboard")
-        st.write("This is the main dashboard view accessible to all users.")
+        # Complete Dashboard with all analysis
+        st.header("📊 Comprehensive Sentiment Dashboard")
         
-        # Basic sentiment distribution
+        # Auto-detect columns
         sentiment_col = guess_sentiment_column(df)
+        text_col = guess_text_column(df)
+        date_cols = [col for col in df.columns if 'date' in col.lower() or 'time' in col.lower()]
+        
+        # Key Metrics
+        st.subheader("� Key Metrics")
+        col1, col2, col3, col4 = st.columns(4)
+        
+        total_feedback = len(df)
+        with col1:
+            st.metric("Total Feedback", f"{total_feedback:,}")
+        
         if sentiment_col:
-            st.subheader('Sentiment Distribution')
-            fig, ax = plt.subplots()
-            df[sentiment_col].value_counts().plot(kind='bar', ax=ax)
-            st.pyplot(fig)
+            positive_count = len(df[df[sentiment_col].astype(str).str.lower().str.contains('positive|good|excellent|5', na=False)])
+            negative_count = len(df[df[sentiment_col].astype(str).str.lower().str.contains('negative|bad|poor|1|2', na=False)])
+            neutral_count = total_feedback - positive_count - negative_count
+            
+            with col2:
+                st.metric("Positive", f"{positive_count:,}", delta=f"{positive_count/total_feedback*100:.1f}%")
+            with col3:
+                st.metric("Negative", f"{negative_count:,}", delta=f"-{negative_count/total_feedback*100:.1f}%")
+            with col4:
+                st.metric("Neutral", f"{neutral_count:,}", delta=f"{neutral_count/total_feedback*100:.1f}%")
+        
+        # Charts Section
+        col1, col2 = st.columns(2)
+        
+        # Sentiment Distribution
+        with col1:
+            if sentiment_col:
+                st.subheader('🎯 Sentiment Distribution')
+                sentiment_counts = df[sentiment_col].value_counts()
+                
+                fig, ax = plt.subplots(figsize=(8, 6))
+                colors = ['green' if 'pos' in str(idx).lower() else 'red' if 'neg' in str(idx).lower() else 'gray' 
+                         for idx in sentiment_counts.index]
+                bars = ax.bar(sentiment_counts.index, sentiment_counts.values, color=colors, alpha=0.7)
+                ax.set_title('Sentiment Distribution', fontsize=14, fontweight='bold')
+                ax.set_xlabel('Sentiment')
+                ax.set_ylabel('Count')
+                
+                # Add value labels on bars
+                for bar in bars:
+                    height = bar.get_height()
+                    ax.text(bar.get_x() + bar.get_width()/2., height + height*0.01,
+                           f'{int(height)}', ha='center', va='bottom')
+                
+                plt.xticks(rotation=45)
+                plt.tight_layout()
+                st.pyplot(fig)
+                plt.close()
+        
+        # Platform Distribution (if platform column exists)
+        with col2:
+            platform_cols = [col for col in df.columns if 'platform' in col.lower() or 'source' in col.lower()]
+            if platform_cols:
+                platform_col = platform_cols[0]
+                st.subheader('📱 Platform Breakdown')
+                platform_counts = df[platform_col].value_counts()
+                
+                fig, ax = plt.subplots(figsize=(8, 6))
+                platform_counts.plot(kind='pie', ax=ax, autopct='%1.1f%%', startangle=90)
+                ax.set_title('Feedback by Platform')
+                ax.set_ylabel('')
+                st.pyplot(fig)
+                plt.close()
+            else:
+                # Show top words if no platform column
+                if text_col:
+                    st.subheader('🔤 Top Keywords')
+                    all_text = ' '.join(df[text_col].astype(str).str.lower())
+                    
+                    # Simple word frequency
+                    words = all_text.split()
+                    # Filter out common words
+                    stop_words = {'the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'is', 'are', 'was', 'were', 'a', 'an'}
+                    words = [word for word in words if len(word) > 3 and word not in stop_words]
+                    
+                    if words:
+                        word_freq = Counter(words).most_common(10)
+                        
+                        if word_freq:
+                            words_df = pd.DataFrame(word_freq, columns=['Word', 'Frequency'])
+                            fig, ax = plt.subplots(figsize=(8, 6))
+                            ax.barh(words_df['Word'], words_df['Frequency'])
+                            ax.set_title('Most Frequent Words')
+                            ax.set_xlabel('Frequency')
+                            st.pyplot(fig)
+                            plt.close()
+        
+        # Time Series Analysis
+        if date_cols and sentiment_col:
+            st.subheader("📅 Sentiment Trends Over Time")
+            date_col = date_cols[0]
+            
+            try:
+                df_time = df.copy()
+                df_time[date_col] = pd.to_datetime(df_time[date_col], errors='coerce')
+                df_time = df_time.dropna(subset=[date_col])
+                
+                if len(df_time) > 0:
+                    # Group by date and sentiment
+                    daily_sentiment = df_time.groupby([df_time[date_col].dt.date, sentiment_col]).size().unstack(fill_value=0)
+                    
+                    fig, ax = plt.subplots(figsize=(12, 6))
+                    for sentiment in daily_sentiment.columns:
+                        color = 'green' if 'pos' in str(sentiment).lower() else 'red' if 'neg' in str(sentiment).lower() else 'gray'
+                        ax.plot(daily_sentiment.index, daily_sentiment[sentiment], 
+                               label=sentiment, marker='o', color=color)
+                    
+                    ax.set_title('Sentiment Trends Over Time')
+                    ax.set_xlabel('Date')
+                    ax.set_ylabel('Count')
+                    ax.legend()
+                    ax.tick_params(axis='x', rotation=45)
+                    plt.tight_layout()
+                    st.pyplot(fig)
+                    plt.close()
+            except Exception as e:
+                st.warning(f"Could not create time series: {e}")
+        
+        # Detailed Analysis
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            # Sentiment Statistics
+            if sentiment_col:
+                st.subheader("📊 Sentiment Statistics")
+                sentiment_stats = df[sentiment_col].value_counts()
+                
+                stats_data = []
+                for sentiment, count in sentiment_stats.items():
+                    percentage = (count / total_feedback) * 100
+                    stats_data.append({
+                        'Sentiment': sentiment,
+                        'Count': count,
+                        'Percentage': f"{percentage:.1f}%"
+                    })
+                
+                stats_df = pd.DataFrame(stats_data)
+                st.dataframe(stats_df, use_container_width=True)
+        
+        with col2:
+            # Recent Feedback
+            st.subheader("📝 Recent Feedback")
+            display_cols = [col for col in df.columns if col in [text_col, sentiment_col, date_cols[0] if date_cols else None] and col is not None]
+            if display_cols:
+                recent_feedback = df[display_cols].tail(5)
+                st.dataframe(recent_feedback, use_container_width=True)
+        
+        # Word Cloud (if available)
+        if WORDCLOUD_AVAILABLE and text_col:
+            st.subheader("☁️ Word Cloud")
+            try:
+                text_data = ' '.join(df[text_col].astype(str))
+                if len(text_data.strip()) > 0:
+                    wordcloud = WordCloud(width=800, height=400, background_color='white').generate(text_data)
+                    
+                    fig, ax = plt.subplots(figsize=(10, 5))
+                    ax.imshow(wordcloud, interpolation='bilinear')
+                    ax.axis('off')
+                    st.pyplot(fig)
+                    plt.close()
+            except Exception as e:
+                st.warning(f"Could not generate word cloud: {e}")
+        
+        # Export Options
+        st.subheader("📤 Export Options")
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            if st.button("📊 Export CSV"):
+                csv = df.to_csv(index=False)
+                st.download_button(
+                    label="Download CSV",
+                    data=csv,
+                    file_name=f"sentiment_data_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+                    mime="text/csv"
+                )
+        
+        with col2:
+            if st.button("📈 Generate Report"):
+                st.info("Report generation feature available in Product Manager and Marketing dashboards")
+        
+        with col3:
+            if st.button("🔄 Refresh Data"):
+                st.rerun()
 
 if __name__ == "__main__":
     main()
