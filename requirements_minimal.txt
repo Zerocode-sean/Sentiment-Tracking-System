@@ -1,0 +1,9 @@
+# Minimal requirements for Streamlit Cloud deployment
+streamlit
+pandas
+numpy
+matplotlib
+plotly
+scikit-learn
+joblib
+wordcloud
