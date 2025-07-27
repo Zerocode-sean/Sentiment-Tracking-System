@@ -331,6 +331,190 @@ def show_admin_panel():
         st.dataframe(activity_df)
     except:
         st.info("No activity logs available")
+    
+    # Live Sentiment Analysis Demo
+    st.subheader("🤖 Live Sentiment Analysis Demo")
+    st.write("Test the trained sentiment model with real-time predictions")
+    
+    # Check if model files exist
+    model_path = os.path.join(os.path.dirname(__file__), "sentiment_model.joblib")
+    vectorizer_path = os.path.join(os.path.dirname(__file__), "tfidf_vectorizer.joblib")
+    
+    if os.path.exists(model_path) and os.path.exists(vectorizer_path):
+        try:
+            # Load model and vectorizer
+            if JOBLIB_AVAILABLE:
+                model = joblib.load(model_path)
+                vectorizer = joblib.load(vectorizer_path)
+                
+                st.success("✅ Sentiment model loaded successfully!")
+                
+                # Text input for testing
+                col1, col2 = st.columns([2, 1])
+                
+                with col1:
+                    test_text = st.text_area(
+                        "Enter text to analyze:",
+                        placeholder="Type your text here to see real-time sentiment analysis...",
+                        height=100
+                    )
+                
+                with col2:
+                    st.write("**Quick Test Examples:**")
+                    if st.button("😊 Positive Example"):
+                        test_text = "This product is amazing! I absolutely love it and would definitely recommend it to others."
+                        st.experimental_rerun()
+                    if st.button("😞 Negative Example"):
+                        test_text = "This is terrible quality. Very disappointed with my purchase and poor customer service."
+                        st.experimental_rerun()
+                    if st.button("😐 Neutral Example"):
+                        test_text = "The product arrived on time. It's okay, nothing special but does what it's supposed to do."
+                        st.experimental_rerun()
+                
+                # Analyze text if provided
+                if test_text and len(test_text.strip()) > 0:
+                    with st.spinner("Analyzing sentiment..."):
+                        try:
+                            # Clean and vectorize text
+                            cleaned_text = clean_text_for_training(test_text)
+                            text_vector = vectorizer.transform([cleaned_text])
+                            
+                            # Get prediction and confidence
+                            prediction = model.predict(text_vector)[0]
+                            prediction_proba = model.predict_proba(text_vector)[0]
+                            confidence = max(prediction_proba)
+                            
+                            # Display results
+                            col1, col2, col3 = st.columns(3)
+                            
+                            with col1:
+                                # Determine color based on sentiment
+                                if 'pos' in str(prediction).lower():
+                                    sentiment_color = "🟢"
+                                    sentiment_emoji = "😊"
+                                elif 'neg' in str(prediction).lower():
+                                    sentiment_color = "🔴"
+                                    sentiment_emoji = "😞"
+                                else:
+                                    sentiment_color = "🟡"
+                                    sentiment_emoji = "😐"
+                                
+                                st.metric(
+                                    f"{sentiment_color} Predicted Sentiment",
+                                    f"{sentiment_emoji} {prediction.title()}"
+                                )
+                            
+                            with col2:
+                                confidence_percentage = confidence * 100
+                                if confidence_percentage > 80:
+                                    confidence_color = "🟢"
+                                elif confidence_percentage > 60:
+                                    confidence_color = "🟡"
+                                else:
+                                    confidence_color = "🔴"
+                                
+                                st.metric(
+                                    f"{confidence_color} Confidence",
+                                    f"{confidence_percentage:.1f}%"
+                                )
+                            
+                            with col3:
+                                st.metric(
+                                    "📝 Text Length",
+                                    f"{len(test_text)} chars"
+                                )
+                            
+                            # Show probability breakdown
+                            st.subheader("📊 Detailed Analysis")
+                            
+                            # Create probability chart
+                            classes = model.classes_
+                            probabilities = prediction_proba
+                            
+                            if PLOTLY_AVAILABLE:
+                                # Interactive probability chart
+                                colors = ['green' if 'pos' in str(cls).lower() else 'red' if 'neg' in str(cls).lower() else 'gray' 
+                                         for cls in classes]
+                                
+                                fig = go.Figure(data=[
+                                    go.Bar(x=classes, y=probabilities * 100, 
+                                           marker_color=colors, opacity=0.7,
+                                           text=[f"{p*100:.1f}%" for p in probabilities],
+                                           textposition='auto')
+                                ])
+                                fig.update_layout(
+                                    title='Sentiment Probability Distribution',
+                                    xaxis_title='Sentiment Class',
+                                    yaxis_title='Probability (%)',
+                                    height=400
+                                )
+                                st.plotly_chart(fig, use_container_width=True)
+                            else:
+                                # Fallback matplotlib chart
+                                fig, ax = plt.subplots(figsize=(8, 4))
+                                colors = ['green' if 'pos' in str(cls).lower() else 'red' if 'neg' in str(cls).lower() else 'gray' 
+                                         for cls in classes]
+                                bars = ax.bar(classes, probabilities * 100, color=colors, alpha=0.7)
+                                ax.set_title('Sentiment Probability Distribution')
+                                ax.set_xlabel('Sentiment Class')
+                                ax.set_ylabel('Probability (%)')
+                                
+                                # Add value labels
+                                for bar, prob in zip(bars, probabilities):
+                                    height = bar.get_height()
+                                    ax.text(bar.get_x() + bar.get_width()/2., height + 1,
+                                           f'{prob*100:.1f}%', ha='center', va='bottom')
+                                
+                                plt.tight_layout()
+                                st.pyplot(fig)
+                                plt.close()
+                            
+                            # Show processed text
+                            with st.expander("🔍 See Processed Text"):
+                                st.write("**Original Text:**")
+                                st.write(f'"{test_text}"')
+                                st.write("**Processed Text (what the model sees):**")
+                                st.write(f'"{cleaned_text}"')
+                                st.write("**Processing Steps:**")
+                                st.write("• Converted to lowercase")
+                                st.write("• Removed URLs and special characters")
+                                st.write("• Removed extra whitespace")
+                                st.write("• Tokenized for machine learning")
+                        
+                        except Exception as e:
+                            st.error(f"Error analyzing text: {e}")
+                            st.info("Make sure the model was trained properly and try again.")
+                
+                # Model Information
+                with st.expander("ℹ️ Model Information"):
+                    try:
+                        st.write("**Model Type:** Logistic Regression")
+                        st.write("**Feature Extraction:** TF-IDF Vectorization")
+                        st.write(f"**Available Classes:** {', '.join(model.classes_)}")
+                        st.write(f"**Model File:** {model_path}")
+                        st.write(f"**Vectorizer File:** {vectorizer_path}")
+                        
+                        # Model file info
+                        model_size = os.path.getsize(model_path) / (1024 * 1024)  # MB
+                        vectorizer_size = os.path.getsize(vectorizer_path) / (1024 * 1024)  # MB
+                        st.write(f"**Model Size:** {model_size:.2f} MB")
+                        st.write(f"**Vectorizer Size:** {vectorizer_size:.2f} MB")
+                        
+                    except Exception as e:
+                        st.warning(f"Could not load model info: {e}")
+            else:
+                st.warning("Joblib not available - cannot load trained model")
+                
+        except Exception as e:
+            st.error(f"Error loading model: {e}")
+            st.info("Train a model first by uploading a dataset above.")
+    else:
+        st.info("🤖 No trained model found. Upload and process a dataset to train a sentiment model.")
+        st.write("**Missing Files:**")
+        if not os.path.exists(model_path):
+            st.write(f"❌ {model_path}")
+        if not os.path.exists(vectorizer_path):
+            st.write(f"❌ {vectorizer_path}")
 
 def show_product_manager_panel(df):
     """Show product manager specific features"""
